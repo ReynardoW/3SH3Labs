@@ -1,0 +1,10 @@
+1:
+a)ps -e will show all of the running processes
+  ps -l will filter all of the processes by thread
+b) kill $(ps -e | grep "FILENAME:)
+
+2:
+a) twice - NOT TOO SURE HOW THIS WORKS LMAO
+b) pstree shows all of the processes in a tree format. Better for visual
+
+3)
