@@ -61,8 +61,6 @@ int main(int argc, char *argv[])
         printf("Using an older semaphore\n");
         printf("sem: %d\n", sem);
     }
-    //Wait before accessing file
-    semop(sem, &sem_wait, 1);
 
     //Memory Map Initialization
     int fd = open(argv[1], O_RDWR, S_IRUSR | S_IWUSR);
@@ -73,7 +71,8 @@ int main(int argc, char *argv[])
     }
     //MAP_SHARED allows other processes to see updates
     char *memoryMap = mmap(NULL, sb.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    //Once done, release semaphore for other processes
+    //Once done, increment semaphore so other process can access memorymap
+    //After creating or grabbing an old semaphore set it to 1
     semop(sem, &sem_signal, 1);
 
     int resourceType;

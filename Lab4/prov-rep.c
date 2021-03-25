@@ -64,9 +64,8 @@ int main(int argc, char *argv[])
         printf("Using an older semaphore\n");
         printf("sem: %d\n", sem);
     }
-    //Wait before accessing file
+    //Wait for other file to finish accessing file
     semop(sem, &sem_wait, 1);
-
     //Memory Map Initialization
     int fd = open(argv[1], O_RDWR, S_IRUSR | S_IWUSR);
     struct stat sb;
@@ -77,9 +76,8 @@ int main(int argc, char *argv[])
     char *memoryMap = mmap(NULL, sb.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     //Once memory map has been initialized release semaphore for other processes
     semop(sem, &sem_signal, 1);
-    
-    int pid = fork();
 
+    int pid = fork();
     
     if(pid == 0)
     {//Child Process
