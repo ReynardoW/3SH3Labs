@@ -78,7 +78,9 @@ int main(int argc, char *argv[])
     semop(sem, &sem_signal, 1);
 
     int pid = fork();
-    
+    int pageSize = getpagesize();
+    int numPages = (sb.st_size + pageSize - 1)/pageSize;
+    unsigned char *vector = malloc(numPages);
     if(pid == 0)
     {//Child Process
         while(1)
@@ -87,9 +89,20 @@ int main(int argc, char *argv[])
             semop(sem, &sem_wait, 1);
             displayResources(memoryMap, (int)sb.st_size);
             //Mincores
-            char *ptr = malloc(sizeof(char));
-            printf("mincore returned: %d\n", mincore((void *)memoryMap, sb.st_size, ptr));
-            printf("mincore: %d\n", *ptr & 1);
+            mincore((void *)memoryMap, sb.st_size, vector);
+            printf("mincore returned: %d\n", mincore((void *)memoryMap, sb.st_size, vector));
+            
+            for(int i = 0; i < numPages; i++)
+            {
+                if(vector[i] & 1)
+                {
+                    printf("Page %d in memory\n", i);
+                }else
+                {
+                    printf("Page %d not in memory\n", i);
+                }
+            }
+
             semop(sem, &sem_signal, 1);
             sleep(10);
         }
