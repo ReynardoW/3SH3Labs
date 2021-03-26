@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     if(sem == -1)
     {
         printf("Creating a new semaphore\n");
-        sem = semget(key, 1, IPC_CREAT);
+        sem = semget(key, 1, IPC_CREAT | S_IRUSR | S_IWUSR);
     }else
     {
         printf("Using an older semaphore\n");
@@ -73,8 +73,13 @@ int main(int argc, char *argv[])
     char *memoryMap = mmap(NULL, sb.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     //Once done, increment semaphore so other process can access memorymap
     //After creating or grabbing an old semaphore set it to 1
-    semop(sem, &sem_signal, 1);
-
+    if(semctl(sem, 0, SETVAL, 1) == -1)
+    {
+        perror("Unable to set semaphore value\n");
+        exit(1);
+    }
+    printf("Semaphore value = %d\n", semctl(sem, 0, GETVAL, 0));
+    
     int resourceType;
     int resourceAmount;
 
